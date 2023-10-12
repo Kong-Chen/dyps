@@ -53,17 +53,16 @@ def handle_message(event):
         password="Aa123456"
     )
     
-    # 收到使用者的訊息
-    timestamp = datetime.now()
+    # 建立使用者訊息
+    # timestamp = datetime.now()
     user_message = event.message.text
     user_line_id = event.source.user_id
-    user_id = None
-    user_nickname = None
+    user_nickname = event.source.user_name
     
     cursor = connection.cursor()
     cursor.execute("SELECT member_name FROM member")
     existing_user = cursor.fetchone()
-    response_word = " ".join([existing_user[0], user_line_id])
+    response_word = " ".join([existing_user[0], user_line_id,user_nickname])
 
 
 
