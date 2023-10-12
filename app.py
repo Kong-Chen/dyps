@@ -62,7 +62,7 @@ def handle_message(event):
     cursor = connection.cursor()
     cursor.execute("SELECT member_name FROM member")
     existing_user = cursor.fetchone()
-    response_word = " ".join([existing_user[0], user_line_id,user_nickname])
+    response_word = " ".join([existing_user[0], user_line_id,''])
 
 
 
