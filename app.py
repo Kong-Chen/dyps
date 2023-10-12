@@ -57,7 +57,7 @@ def handle_message(event):
     # timestamp = datetime.now()
     user_message = event.message.text
     user_line_id = event.source.user_id
-    user_nickname = event.source.user_name
+    user_nickname = event.source.user_display_name
     
     cursor = connection.cursor()
     cursor.execute("SELECT member_name FROM member")
