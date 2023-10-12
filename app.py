@@ -62,7 +62,7 @@ def handle_message(event):
     
     cursor = connection.cursor()
     cursor.execute("SELECT member_name FROM member")
-    existing_user = cursor.fetchone()
+    existing_user = cursor.fetchone() + user_line_id
 
 
 
