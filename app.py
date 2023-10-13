@@ -118,7 +118,7 @@ def handle_message(event):
         query = "SELECT mission_no,mission_desc FROM prod_dyps.mission WHERE mission_code = %s"
         cursor.execute(query, (user_message,))
         mission = cursor.fetchone()
-        if mission[0]:
+        if mission:
             #如果有中密碼
             query = "SELECT B.mission_desc FROM prod_dyps.user_mission A join prod_dyps.mission B ON A.mission_no=B.mission_no join prod_dyps.user C ON A.user_no=C.user_no WHERE C.user_id =%s AND A.mission_no=%s"
             data = (user_line_id, mission[0])
@@ -136,7 +136,6 @@ def handle_message(event):
                 response_word ="恭喜你成功完成:"+mission[1]
         else:
             response_word = "你是一般人 不要亂講話1"
-        response_word = "你是一般人 不要亂講話2"
     
     try:
         if user_message =='Nasa':
