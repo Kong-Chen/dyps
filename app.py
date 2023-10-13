@@ -10,6 +10,8 @@ import psycopg2
 from datetime import datetime
 import mysql.connector
 import requests
+import random
+import string
 
 app = Flask(__name__)
 
@@ -17,6 +19,10 @@ app = Flask(__name__)
 line_bot_api = LineBotApi(os.environ['LINE_CHANNEL_ACCESS_TOKEN'])
 handler = WebhookHandler(os.environ['LINE_CHANNEL_SECRET'])
 
+def generate_random_code(length):
+    characters = string.ascii_lowercase + string.digits
+    random_code = ''.join(random.choice(characters) for i in range(length))
+    return random_code
 
 # 註冊 UUID 型別的適應器
 def adapt_uuid(uuid):
@@ -77,6 +83,12 @@ def handle_message(event):
                 response_word += '\n' +a[0]+'的密碼是'+a[1]
             
         elif user_message =='更新關卡密碼':
+            for i in range(1,5):
+                random_code = generate_random_code(8)
+                cursor = connection.cursor()
+                query = "UPDATE mission SET mission_code = %s WHERE mission_no= %s"
+                cursor.execute(query, (random_code,i))
+                print("隨機生成的八位數字串:", random_code)
             response_word ="更新關卡密碼成功"
         elif user_message =='活動數據':
             response_word ="數據如下:"
