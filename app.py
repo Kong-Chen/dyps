@@ -17,27 +17,6 @@ app = Flask(__name__)
 line_bot_api = LineBotApi(os.environ['LINE_CHANNEL_ACCESS_TOKEN'])
 handler = WebhookHandler(os.environ['LINE_CHANNEL_SECRET'])
 
-# 設置 LINE 官方帳號的 user ID
-official_account_user_id = "U55ac2da146cca818446f9abd94a628ac"
-
-def get_official_account_followers():
-    # 替換為您的 LINE 官方帳號的 Channel Access Token
-    channel_access_token = LineBotApi(os.environ['LINE_CHANNEL_ACCESS_TOKEN'])
-
-    # 使用 LINE Messaging API 獲取追蹤者數量
-    url = f"https://api.line.me/v2/bot/profile/{official_account_user_id}"
-    headers = {
-        "Authorization": f"Bearer {channel_access_token}"
-    }
-    response = requests.get(url, headers=headers)
-
-    if response.status_code == 200:
-        data = response.json()
-        followers_count = data.get("followersCount", "N/A")
-        return followers_count
-    else:
-        return "Error fetching followers count"
-
 
 # 註冊 UUID 型別的適應器
 def adapt_uuid(uuid):
@@ -100,8 +79,7 @@ def handle_message(event):
         elif user_message =='更新關卡密碼':
             response_word ="更新關卡密碼成功"
         elif user_message =='活動數據':
-            followers_count = get_official_account_followers()
-            response_word ="粉絲如下:"+followers_count
+            response_word ="數據如下:"
         else:
             response_word ="管理者功能指令如下:"+'\n' +"1.查詢關卡密碼"+'\n'+"2.更新關卡密碼"+'\n'+ "3.活動數據"
     else:
