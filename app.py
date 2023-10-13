@@ -58,20 +58,30 @@ def handle_message(event):
     user_message = event.message.text
     user_line_id = event.source.user_id
     #user_nickname = event.source.user_display_name
-    
+    response_word = ''
+
     #判斷身分
     cursor = connection.cursor()
     query = "SELECT admin_no FROM prod_dyps.admin WHERE admin_id = %s"
     cursor.execute(query, (user_line_id,))
     is_admin = cursor.fetchone()
-    
+
     if is_admin:
-        if user_message =='更新關卡密碼':
+        if user_message =='查詢關卡密碼':
+            cursor = connection.cursor()
+            query = "SELECT mission_desc,mission_code FROM prod_dyps.mission"
+            cursor.execute(query, ())
+            aaa = cursor.fetchall()
+            response_word ="關卡密碼如下:"
+            for a in aaa:
+                response_word += '\n' +a[0]+'的密碼是'+a[1]
+            
+        elif user_message =='更新關卡密碼':
             response_word ="更新關卡密碼成功"
         elif user_message =='活動數據':
             response_word ="數據如下:"
         else:
-            response_word ="管理者功能指令如下:1.更新關卡密碼 2.活動數據"
+            response_word ="管理者功能指令如下:"+'\n' +"1.查詢關卡密碼"+'\n'+"2.更新關卡密碼"+'\n'+ "3.活動數據"
     else:
    
         response_word ="你是普通人"
