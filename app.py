@@ -66,7 +66,7 @@ def handle_message(event):
     user_message = event.message.text
     user_line_id = event.source.user_id
     #user_nickname = event.source.user_display_name
-    response_word = ''
+    response_word = '111111'
     is_admin = None
     if event.source.type == 'user':
         profile = line_bot_api.get_profile(user_line_id)
@@ -137,8 +137,6 @@ def handle_message(event):
         else:
             response_word ="你是普通人不要亂講話!!!!"
     
-    # response_word = " ".join([existing_user[0], user_line_id,''])
-
     try:
         if user_message =='Nasa':
             # API 密鑰
