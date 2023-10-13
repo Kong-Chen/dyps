@@ -63,11 +63,17 @@ def handle_message(event):
     cursor = connection.cursor()
     query = "SELECT admin_no FROM prod_dyps.admin WHERE admin_id = %s"
     cursor.execute(query, (user_line_id,))
-    result = cursor.fetchone()
+    is_admin = cursor.fetchone()
     
-    if result:
-        response_word ="你是管理者。序號為{result}"
+    if is_admin:
+        if user_message =='更新關卡密碼':
+            response_word ="更新關卡密碼成功"
+        elif user_message =='活動數據':
+            response_word ="數據如下:"
+        else:
+            response_word ="管理者功能指令如下:1.更新關卡密碼 2.活動數據"
     else:
+   
         response_word ="你是普通人"
     
     # response_word = " ".join([existing_user[0], user_line_id,''])
