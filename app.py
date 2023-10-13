@@ -12,6 +12,7 @@ import mysql.connector
 import requests
 import random
 import string
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -28,6 +29,7 @@ def generate_random_code(length):
 def adapt_uuid(uuid):
     return adapt(str(uuid))
 register_adapter(uuid.UUID, adapt_uuid)
+
 
 
 @app.route("/callback", methods=['POST'])
@@ -65,6 +67,7 @@ def handle_message(event):
     user_line_id = event.source.user_id
     #user_nickname = event.source.user_display_name
     response_word = ''
+    is_admin = None
     if event.source.type == 'user':
         profile = line_bot_api.get_profile(user_line_id)
         user_nickname = profile.display_name
@@ -85,7 +88,7 @@ def handle_message(event):
                 response_word += '\n' +a[0]+'的密碼是'+a[1]
             
         elif user_message =='更新關卡密碼':
-            for i in range(1,5):
+            for i in range(1,4):
                 random_code = generate_random_code(8)
                 cursor = connection.cursor()
                 query = "UPDATE mission SET mission_code = %s WHERE mission_no= %s"
@@ -106,10 +109,33 @@ def handle_message(event):
             data = (user_line_id, user_nickname)  # 您的資料
             cursor.execute(query, data)
             connection.commit()
+            query = "SELECT user_no FROM prod_dyps.user WHERE user_id = %s"
+            cursor.execute(query, (user_line_id,))
+            user_no = cursor.fetchone()
+            
         
         #判斷對話
-        
-        response_word ="你是普通人"
+        query = "SELECT mission_no,mission_desc FROM prod_dyps.mission WHERE mission_code = %s"
+        cursor.execute(query, (user_message,))
+        mission = cursor.fetchone()
+        if mission[0]:
+            #如果有中密碼
+            query = "SELECT B.mission_desc FROM prod_dyps.user_mission A join prod_dyps.mission B ON A.mission_no=B.mission_no join prod_dyps.user C ON A.user_no=C.user_no WHERE C.user_id =%s AND mission_no=%s"
+            data = (user_line_id, mission[0])  # 您的資料
+            cursor.execute(query, data)
+            mission_desc = cursor.fetchone
+            if mission_desc:
+                response_word ="你已經玩過:"+mission_desc
+            else:
+                #塞入獲獎紀錄
+                current_datetime = datetime.now()
+                query = "INSERT INTO prod_dyps.user_mission (user_no, mission_no,mission_time) VALUES (%s, %s, %s)"
+                data = (user_no, mission[0],current_datetime)  # 您的資料
+                cursor.execute(query, data)
+                connection.commit()
+                response_word ="恭喜你成功完成:"+mission[1]
+        else:
+            response_word ="你是普通人不要亂講話!!!!"
     
     # response_word = " ".join([existing_user[0], user_line_id,''])
 
