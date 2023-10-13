@@ -120,7 +120,7 @@ def handle_message(event):
         mission = cursor.fetchone()
         if mission[0]:
             #如果有中密碼
-            query = "SELECT B.mission_desc FROM prod_dyps.user_mission A join prod_dyps.mission B ON A.mission_no=B.mission_no join prod_dyps.user C ON A.user_no=C.user_no WHERE C.user_id =%s AND mission_no=%s"
+            query = "SELECT B.mission_desc FROM prod_dyps.user_mission A join prod_dyps.mission B ON A.mission_no=B.mission_no join prod_dyps.user C ON A.user_no=C.user_no WHERE C.user_id =%s AND A.mission_no=%s"
             data = (user_line_id, mission[0])  # 您的資料
             cursor.execute(query, data)
             mission_desc = cursor.fetchone
