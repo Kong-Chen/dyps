@@ -65,7 +65,9 @@ def handle_message(event):
     user_line_id = event.source.user_id
     #user_nickname = event.source.user_display_name
     response_word = ''
-
+    if event.source.type == 'user':
+        profile = line_bot_api.get_profile(user_line_id)
+        user_nickname = profile.display_name
     #判斷身分
     cursor = connection.cursor()
     query = "SELECT admin_no FROM prod_dyps.admin WHERE admin_id = %s"
@@ -94,17 +96,22 @@ def handle_message(event):
             response_word ="數據如下:"
         else:
             response_word ="管理者功能指令如下:"+'\n' +"1.查詢關卡密碼"+'\n'+"2.更新關卡密碼"+'\n'+ "3.活動數據"
-    else:
-   
+    else:   
+        #判斷使用者資料
+        query = "SELECT user_no FROM prod_dyps.user WHERE user_id = %s"
+        cursor.execute(query, (user_line_id,))
+        user_no = cursor.fetchone()
+        if not user_no:
+            query = "INSERT INTO prod_dyps.user (user_id, user_name) VALUES (%s, %s)"
+            data = (user_line_id, user_nickname)  # 您的資料
+            cursor.execute(query, data)
+            connection.commit()
+        
+        #判斷對話
+        
         response_word ="你是普通人"
     
     # response_word = " ".join([existing_user[0], user_line_id,''])
-
-
-
-    if event.source.type == 'user':
-        profile = line_bot_api.get_profile(user_line_id)
-        user_nickname = profile.display_name
 
     try:
         if user_message =='Nasa':
