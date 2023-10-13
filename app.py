@@ -88,8 +88,8 @@ def handle_message(event):
                 cursor = connection.cursor()
                 query = "UPDATE mission SET mission_code = %s WHERE mission_no= %s"
                 cursor.execute(query, (random_code,i))
-                print("隨機生成的八位數字串:", random_code)
-            response_word ="更新關卡密碼成功"
+                connection.commit()
+            response_word ="更新關卡密碼成功!"
         elif user_message =='活動數據':
             response_word ="數據如下:"
         else:
