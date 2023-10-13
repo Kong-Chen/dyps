@@ -125,12 +125,12 @@ def handle_message(event):
             cursor.execute(query, data)
             mission_desc = cursor.fetchone()
             if mission_desc:
-                response_word ="你已經玩過:"+mission_desc
+                response_word ="你已經玩過:"+mission_desc[0]
             else:
                 #塞入獲獎紀錄
                 current_datetime = datetime.now()
                 query = "INSERT INTO prod_dyps.user_mission (user_no, mission_no,mission_time) VALUES (%s, %s, %s)"
-                data = (user_no, mission[0],current_datetime)  # 您的資料
+                data = (user_no[0], mission[0],current_datetime)  # 您的資料
                 cursor.execute(query, data)
                 connection.commit()
                 response_word ="恭喜你成功完成:"+mission[1]
