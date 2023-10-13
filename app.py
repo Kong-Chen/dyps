@@ -48,7 +48,7 @@ def handle_message(event):
     connection = mysql.connector.connect(
         host="fortune.ckgadenebkdr.ap-northeast-3.rds.amazonaws.com",
         port="3306",
-        database="members",
+        database="prod_dyps",
         user="admin",
         password="Aa123456"
     )
@@ -59,10 +59,18 @@ def handle_message(event):
     user_line_id = event.source.user_id
     #user_nickname = event.source.user_display_name
     
+    #判斷身分
     cursor = connection.cursor()
-    cursor.execute("SELECT member_name FROM member")
-    existing_user = cursor.fetchone()
-    response_word = " ".join([existing_user[0], user_line_id,''])
+    query = "SELECT admin_no FROM prod_dyps.admin WHERE admin_id = %s"
+    cursor.execute(query, (user_line_id,))
+    result = cursor.fetchone()
+    
+    if result:
+        response_word ="你是管理者。序號為{result}"
+    else:
+        response_word ="你是普通人"
+    
+    # response_word = " ".join([existing_user[0], user_line_id,''])
 
 
 
