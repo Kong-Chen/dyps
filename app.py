@@ -135,7 +135,8 @@ def handle_message(event):
                 connection.commit()
                 response_word ="恭喜你成功完成:"+mission[1]
         else:
-            response_word = mission[1]
+            response_word = "你是一般人 不要亂講話1"
+        response_word = "你是一般人 不要亂講話2"
     
     try:
         if user_message =='Nasa':
