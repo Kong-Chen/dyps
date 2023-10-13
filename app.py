@@ -106,7 +106,7 @@ def handle_message(event):
         user_no = cursor.fetchone()
         if not user_no:
             query = "INSERT INTO prod_dyps.user (user_id, user_name) VALUES (%s, %s)"
-            data = (user_line_id, user_nickname)  # 您的資料
+            data = (user_line_id, user_nickname)  
             cursor.execute(query, data)
             connection.commit()
             query = "SELECT user_no FROM prod_dyps.user WHERE user_id = %s"
@@ -135,7 +135,7 @@ def handle_message(event):
                 connection.commit()
                 response_word ="恭喜你成功完成:"+mission[1]
         else:
-            response_word ="你是普通人不要亂講話!!!!"
+            response_word = mission[1]
     
     try:
         if user_message =='Nasa':
