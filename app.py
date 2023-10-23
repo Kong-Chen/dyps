@@ -102,7 +102,7 @@ def handle_message(event):
                 cursor.execute(query, ())
                 aaa = cursor.fetchone()
                 mission4_count = aaa[0]
-                response_word ='報表數據如下:' + '\n' + '總參與人數:' + str(user_count) + '人' + '\n' + '第一關完成人數:' + str(mission1_count) + '人' + '\n' + '第二關完成人數:' + str(mission2_count) + '人' + '\n' + '第三關完成人數:' + str(mission3_count) + '人' + '\n' + '第四關完成人數:' + str(mission4_count) + '人'
+                response_word ='已參加遊戲人數:' + str(user_count) + '人' + '\n' + '第一關完成人數:' + str(mission1_count) + '人' + '\n' + '第二關完成人數:' + str(mission2_count) + '人' + '\n' + '第三關完成人數:' + str(mission3_count) + '人' + '\n' + '第四關完成人數:' + str(mission4_count) + '人'
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(text=response_word)
