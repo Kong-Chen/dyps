@@ -80,7 +80,7 @@ def handle_message(event):
         is_admin = cursor.fetchone()
 
         if is_admin:
-            if user_message =='1108報表':
+            if user_message =='1118報表':
                 cursor = connection.cursor()
                 query = "SELECT count(*) FROM prod_dyps.user"
                 cursor.execute(query, ())
