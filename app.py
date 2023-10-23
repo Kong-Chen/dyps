@@ -97,7 +97,7 @@ def handle_message(event):
                 query = "SELECT COUNT(distinct user_no) FROM prod_dyps.user_mission WHERE mission_no = 4"
                 cursor.execute(query, ())
                 mission4_count = cursor.fetchone()
-                response_word ='報表數據如下:'+'\n'+'總參與人數:'+user_count+'人'+'\n'+'第一關完成人數:'+mission1_count+'人'+'\n'+'第二關完成人數:'+mission2_count+'人'+'\n'+'第三關完成人數:'+mission3_count+'人'+'\n'+'第四關完成人數:'+mission4_count+'人'
+                response_word ='報表數據如下:' + '\n' + '總參與人數:' + str(user_count) + '人' + '\n' + '第一關完成人數:' + str(mission1_count) + '人' + '\n' + '第二關完成人數:' + str(mission2_count) + '人' + '\n' + '第三關完成人數:' + str(mission3_count) + '人' + '\n' + '第四關完成人數:' + str(mission4_count) + '人'
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(text=response_word)
