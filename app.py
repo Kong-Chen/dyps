@@ -66,111 +66,75 @@ def handle_message(event):
     user_message = event.message.text
     user_line_id = event.source.user_id
     #user_nickname = event.source.user_display_name
-    response_word = '111111'
+    response_word = ''
     is_admin = None
     if event.source.type == 'user':
         profile = line_bot_api.get_profile(user_line_id)
         user_nickname = profile.display_name
-    #判斷身分
-    cursor = connection.cursor()
-    query = "SELECT admin_no FROM prod_dyps.admin WHERE admin_id = %s"
-    cursor.execute(query, (user_line_id,))
-    is_admin = cursor.fetchone()
-
-    if is_admin:
-        if user_message =='查詢關卡密碼':
-            cursor = connection.cursor()
-            query = "SELECT mission_desc,mission_code FROM prod_dyps.mission"
-            cursor.execute(query, ())
-            aaa = cursor.fetchall()
-            response_word ="關卡密碼如下:"
-            for a in aaa:
-                response_word += '\n' +a[0]+'的密碼是'+a[1]
-            
-        elif user_message =='更新關卡密碼':
-            for i in range(1,4):
-                random_code = generate_random_code(8)
-                cursor = connection.cursor()
-                query = "UPDATE mission SET mission_code = %s WHERE mission_no= %s"
-                cursor.execute(query, (random_code,i))
-                connection.commit()
-            response_word ="更新關卡密碼成功!"
-        elif user_message =='活動數據':
-            response_word ="數據如下:"
-        else:
-            response_word ="管理者功能指令如下:"+'\n' +"1.查詢關卡密碼"+'\n'+"2.更新關卡密碼"+'\n'+ "3.活動數據"
-    else:   
-        #判斷使用者資料
-        query = "SELECT user_no FROM prod_dyps.user WHERE user_id = %s"
+    
+    try:
+        #判斷身分
+        cursor = connection.cursor()
+        query = "SELECT admin_no FROM prod_dyps.admin WHERE admin_id = %s"
         cursor.execute(query, (user_line_id,))
-        user_no = cursor.fetchone()
-        if not user_no:
-            query = "INSERT INTO prod_dyps.user (user_id, user_name) VALUES (%s, %s)"
-            data = (user_line_id, user_nickname)  
-            cursor.execute(query, data)
-            connection.commit()
+        is_admin = cursor.fetchone()
+
+        if is_admin:
+            if user_message =='1108報表':
+                cursor = connection.cursor()
+                query = "SELECT count(*) FROM prod_dyps.user"
+                cursor.execute(query, ())
+                user_count = cursor.fetchone()
+                query = "SELECT COUNT(distinct user_no) FROM prod_dyps.user_mission WHERE mission_no = 1"
+                cursor.execute(query, ())
+                mission1_count = cursor.fetchone()
+                query = "SELECT COUNT(distinct user_no) FROM prod_dyps.user_mission WHERE mission_no = 2"
+                cursor.execute(query, ())
+                mission2_count = cursor.fetchone()
+                query = "SELECT COUNT(distinct user_no) FROM prod_dyps.user_mission WHERE mission_no = 3"
+                cursor.execute(query, ())
+                mission3_count = cursor.fetchone()
+                query = "SELECT COUNT(distinct user_no) FROM prod_dyps.user_mission WHERE mission_no = 4"
+                cursor.execute(query, ())
+                mission4_count = cursor.fetchone()
+                response_word ='報表數據如下:'+'\n'+'總參與人數:'+user_count+'人'+'\n'+'第一關完成人數:'+mission1_count+'人'+'\n'+'第二關完成人數:'+mission2_count+'人'+'\n'+'第三關完成人數:'+mission3_count+'人'+'\n'+'第四關完成人數:'+mission4_count+'人'
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text=response_word)
+                )
+
+        else:   
+            #判斷使用者資料
             query = "SELECT user_no FROM prod_dyps.user WHERE user_id = %s"
             cursor.execute(query, (user_line_id,))
             user_no = cursor.fetchone()
-            
-        
-        #判斷對話
-        query = "SELECT mission_no,mission_desc FROM prod_dyps.mission WHERE mission_code = %s"
-        cursor.execute(query, (user_message,))
-        mission = cursor.fetchone()
-        if mission:
-            #如果有中密碼
-            query = "SELECT B.mission_desc FROM prod_dyps.user_mission A join prod_dyps.mission B ON A.mission_no=B.mission_no join prod_dyps.user C ON A.user_no=C.user_no WHERE C.user_id =%s AND A.mission_no=%s"
-            data = (user_line_id, mission[0])
-            cursor.execute(query, data)
-            mission_desc = cursor.fetchone()
-            if mission_desc:
-                response_word ="你已經玩過:"+mission_desc[0]
-            else:
-                #塞入獲獎紀錄
-                current_datetime = datetime.now()
-                query = "INSERT INTO prod_dyps.user_mission (user_no, mission_no,mission_time) VALUES (%s, %s, %s)"
-                data = (user_no[0], mission[0],current_datetime)  # 您的資料
+            if not user_no:
+                query = "INSERT INTO prod_dyps.user (user_id, user_name) VALUES (%s, %s)"
+                data = (user_line_id, user_nickname)  
                 cursor.execute(query, data)
                 connection.commit()
-                response_word ="恭喜你成功完成:"+mission[1]
-        else:
-            response_word = "你是一般人 不要亂講話1"
-    
-    try:
-        if user_message =='Nasa':
-            # API 密鑰
-            api_key = "74K2SccksUYY9UL8P6FPb7oz3Vn0JFacjP5ZPdPh"
-
-            # API 網址
-            url = "https://api.nasa.gov/planetary/apod"
-
-            # API 參數
-            params = {
-                "api_key": api_key
-            }
-
-            # 發送 API 請求
-            response = requests.get(url, params=params)
-
-            # 取得 API 的返回值
-            data = response.json()
-
-            # 顯示照片的網址
-            print("Picture URL:", data["url"])
-            line_bot_api.reply_message(
-            event.reply_token,
-            ImageSendMessage(
-                original_content_url=data["url"],
-                preview_image_url=data["url"]
-        )
-    )
-        else:
-            line_bot_api.reply_message(
-                event.reply_token,
-                TextSendMessage(text=response_word)
-        )
+                query = "SELECT user_no FROM prod_dyps.user WHERE user_id = %s"
+                cursor.execute(query, (user_line_id,))
+                user_no = cursor.fetchone()
         
+            #判斷對話
+            query = "SELECT mission_no,mission_desc FROM prod_dyps.mission WHERE mission_code = %s"
+            cursor.execute(query, (user_message,))
+            mission = cursor.fetchone()
+            if mission:
+                #如果有中密碼
+                query = "SELECT B.mission_desc FROM prod_dyps.user_mission A join prod_dyps.mission B ON A.mission_no=B.mission_no join prod_dyps.user C ON A.user_no=C.user_no WHERE C.user_id =%s AND A.mission_no=%s"
+                data = (user_line_id, mission[0])
+                cursor.execute(query, data)
+                mission_desc = cursor.fetchone()
+                if not mission_desc:
+                    #塞入獲獎紀錄
+                    current_datetime = datetime.now()
+                    query = "INSERT INTO prod_dyps.user_mission (user_no, mission_no,mission_time) VALUES (%s, %s, %s)"
+                    data = (user_no[0], mission[0],current_datetime)  # 您的資料
+                    cursor.execute(query, data)
+                    connection.commit()
+    
     except psycopg2.Error as e:
         # print("資料庫錯誤:", e)
         line_bot_api.reply_message(
