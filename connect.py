@@ -10,47 +10,9 @@ import psycopg2
 from datetime import datetime
 import mysql.connector
 import requests
-import random
-import string
-from datetime import datetime
-
-app = Flask(__name__)
-
-# 設置你的 LINE Bot 的 Channel Access Token 和 Channel Secret
-line_bot_api = LineBotApi(os.environ['LINE_CHANNEL_ACCESS_TOKEN'])
-handler = WebhookHandler(os.environ['LINE_CHANNEL_SECRET'])
-
-def generate_random_code(length):
-    characters = string.ascii_lowercase + string.digits
-    random_code = ''.join(random.choice(characters) for i in range(length))
-    return random_code
-
-# 註冊 UUID 型別的適應器
-def adapt_uuid(uuid):
-    return adapt(str(uuid))
-register_adapter(uuid.UUID, adapt_uuid)
 
 
-
-@app.route("/callback", methods=['POST'])
-def callback():
-    # 取得 request headers 中的 X-Line-Signature 屬性
-    signature = request.headers['X-Line-Signature']
-    
-    # 取得 request 的 body 內容
-    body = request.get_data(as_text=True)
-    
-    try:
-        # 驗證簽章
-        handler.handle(body, signature)
-    except InvalidSignatureError:
-        abort(400)
-    
-    return 'OK'
-
-
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
+def main():
     
     # 建立連接 (修改)
     connection = psycopg2.connect(
@@ -60,17 +22,17 @@ def handle_message(event):
         user="admin",
         password="1tP8cSuVatmtgGQL4pOHMYEBGhnfPPQC"
     )
+    cursor = connection.cursor()
+
+
+    user_message='111'
+    user_line_id='222'
+    user_nickname='333333'
     
-    # 建立使用者訊息
+# 建立使用者訊息
     # timestamp = datetime.now()
-    user_message = event.message.text
-    user_line_id = event.source.user_id
     #user_nickname = event.source.user_display_name
     response_word = ''
-    is_admin = None
-    if event.source.type == 'user':
-        profile = line_bot_api.get_profile(user_line_id)
-        user_nickname = profile.display_name
     
     try:
         #判斷身分
@@ -103,10 +65,7 @@ def handle_message(event):
                 aaa = cursor.fetchone()
                 mission4_count = aaa[0]
                 response_word ='已參加遊戲人數:' + str(user_count) + '人' + '\n' + '第一關完成人數:' + str(mission1_count) + '人' + '\n' + '第二關完成人數:' + str(mission2_count) + '人' + '\n' + '第三關完成人數:' + str(mission3_count) + '人' + '\n' + '第四關完成人數:' + str(mission4_count) + '人'
-                line_bot_api.reply_message(
-                    event.reply_token,
-                    TextSendMessage(text=response_word)
-                )
+                print(response_word)
 
         else:   
             #判斷使用者資料
@@ -128,7 +87,7 @@ def handle_message(event):
             mission = cursor.fetchone()
             if mission:
                 #如果有中密碼
-                query = "SELECT B.mission_desc FROM user_mission A join mission B ON A.mission_no=B.mission_no join public.user C ON A.user_no=C.user_no WHERE C.user_id =%s AND A.mission_no=%s"
+                query = "SELECT B.mission_desc FROM user_mission A join mission B ON A.mission_no=B.mission_no join user C ON A.user_no=C.user_no WHERE C.user_id =%s AND A.mission_no=%s"
                 data = (user_line_id, mission[0])
                 cursor.execute(query, data)
                 mission_desc = cursor.fetchone()
@@ -141,16 +100,11 @@ def handle_message(event):
                     connection.commit()
     
     except psycopg2.Error as e:
-        # print("資料庫錯誤:", e)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text="資料庫錯誤啦!")
-        )
+        print("資料庫錯誤:", e)
+        #print("資料庫錯誤啦!")
 
     finally:
         cursor.close()
         connection.close()
-
 if __name__ == "__main__":
-    # 在本地運行時才啟動伺服器
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    main()
