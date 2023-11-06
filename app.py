@@ -110,15 +110,15 @@ def handle_message(event):
 
         else:   
             #判斷使用者資料
-            query = "SELECT user_no FROM public.user WHERE user_id = %s"
+            query = "SELECT user_no FROM users WHERE user_id = %s"
             cursor.execute(query, (user_line_id,))
             user_no = cursor.fetchone()
             if not user_no:
-                query = "INSERT INTO public.user (user_id, user_name) VALUES (%s, %s)"
+                query = "INSERT INTO users (user_id, user_name) VALUES (%s, %s)"
                 data = (user_line_id, user_nickname)  
                 cursor.execute(query, data)
                 connection.commit()
-                query = "SELECT user_no FROM public.user WHERE user_id = %s"
+                query = "SELECT user_no FROM users WHERE user_id = %s"
                 cursor.execute(query, (user_line_id,))
                 user_no = cursor.fetchone()
         
@@ -128,7 +128,7 @@ def handle_message(event):
             mission = cursor.fetchone()
             if mission:
                 #如果有中密碼
-                query = "SELECT B.mission_desc FROM user_mission A join mission B ON A.mission_no=B.mission_no join public.user C ON A.user_no=C.user_no WHERE C.user_id =%s AND A.mission_no=%s"
+                query = "SELECT B.mission_desc FROM user_mission A join mission B ON A.mission_no=B.mission_no join users C ON A.user_no=C.user_no WHERE C.user_id =%s AND A.mission_no=%s"
                 data = (user_line_id, mission[0])
                 cursor.execute(query, data)
                 mission_desc = cursor.fetchone()
