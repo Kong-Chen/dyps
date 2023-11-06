@@ -53,12 +53,12 @@ def callback():
 def handle_message(event):
     
     # 建立連接 (修改)
-    connection = psycopg2.connect(
-        host="dpg-cl490h1novjs73bvmclg-a.oregon-postgres.render.com",
-        port="5432",
-        database="dyps",
+    connection = mysql.connector.connect(
+        host="fortune.ckgadenebkdr.ap-northeast-3.rds.amazonaws.com",
+        port="3306",
+        database="prod_dyps",
         user="admin",
-        password="1tP8cSuVatmtgGQL4pOHMYEBGhnfPPQC"
+        password="Aa123456"
     )
     
     # 建立使用者訊息
@@ -75,30 +75,30 @@ def handle_message(event):
     try:
         #判斷身分
         cursor = connection.cursor()
-        query = "SELECT admin_no FROM admin WHERE admin_id = %s"
+        query = "SELECT admin_no FROM prod_dyps.admin WHERE admin_id = %s"
         cursor.execute(query, (user_line_id,))
         is_admin = cursor.fetchone()
 
         if is_admin:
             if user_message =='1118報表':
                 cursor = connection.cursor()
-                query = "SELECT count(*) FROM user"
+                query = "SELECT count(*) FROM prod_dyps.user"
                 cursor.execute(query, ())
                 aaa = cursor.fetchone()
                 user_count = aaa[0]
-                query = "SELECT COUNT(distinct user_no) FROM user_mission WHERE mission_no = 1"
+                query = "SELECT COUNT(distinct user_no) FROM prod_dyps.user_mission WHERE mission_no = 1"
                 cursor.execute(query, ())
                 aaa = cursor.fetchone()
                 mission1_count = aaa[0]
-                query = "SELECT COUNT(distinct user_no) FROM user_mission WHERE mission_no = 2"
+                query = "SELECT COUNT(distinct user_no) FROM prod_dyps.user_mission WHERE mission_no = 2"
                 cursor.execute(query, ())
                 aaa = cursor.fetchone()
                 mission2_count = aaa[0]
-                query = "SELECT COUNT(distinct user_no) FROM user_mission WHERE mission_no = 3"
+                query = "SELECT COUNT(distinct user_no) FROM prod_dyps.user_mission WHERE mission_no = 3"
                 cursor.execute(query, ())
                 aaa = cursor.fetchone()
                 mission3_count = aaa[0]
-                query = "SELECT COUNT(distinct user_no) FROM user_mission WHERE mission_no = 4"
+                query = "SELECT COUNT(distinct user_no) FROM prod_dyps.user_mission WHERE mission_no = 4"
                 cursor.execute(query, ())
                 aaa = cursor.fetchone()
                 mission4_count = aaa[0]
@@ -110,32 +110,32 @@ def handle_message(event):
 
         else:   
             #判斷使用者資料
-            query = "SELECT user_no FROM user WHERE user_id = %s"
+            query = "SELECT user_no FROM prod_dyps.user WHERE user_id = %s"
             cursor.execute(query, (user_line_id,))
             user_no = cursor.fetchone()
             if not user_no:
-                query = "INSERT INTO user (user_id, user_name) VALUES (%s, %s)"
+                query = "INSERT INTO prod_dyps.user (user_id, user_name) VALUES (%s, %s)"
                 data = (user_line_id, user_nickname)  
                 cursor.execute(query, data)
                 connection.commit()
-                query = "SELECT user_no FROM user WHERE user_id = %s"
+                query = "SELECT user_no FROM prod_dyps.user WHERE user_id = %s"
                 cursor.execute(query, (user_line_id,))
                 user_no = cursor.fetchone()
         
             #判斷對話
-            query = "SELECT mission_no,mission_desc FROM mission WHERE mission_code = %s"
+            query = "SELECT mission_no,mission_desc FROM prod_dyps.mission WHERE mission_code = %s"
             cursor.execute(query, (user_message,))
             mission = cursor.fetchone()
             if mission:
                 #如果有中密碼
-                query = "SELECT B.mission_desc FROM user_mission A join mission B ON A.mission_no=B.mission_no join user C ON A.user_no=C.user_no WHERE C.user_id =%s AND A.mission_no=%s"
+                query = "SELECT B.mission_desc FROM prod_dyps.user_mission A join prod_dyps.mission B ON A.mission_no=B.mission_no join prod_dyps.user C ON A.user_no=C.user_no WHERE C.user_id =%s AND A.mission_no=%s"
                 data = (user_line_id, mission[0])
                 cursor.execute(query, data)
                 mission_desc = cursor.fetchone()
                 if not mission_desc:
                     #塞入獲獎紀錄
                     current_datetime = datetime.now()
-                    query = "INSERT INTO user_mission (user_no, mission_no,mission_time) VALUES (%s, %s, %s)"
+                    query = "INSERT INTO prod_dyps.user_mission (user_no, mission_no,mission_time) VALUES (%s, %s, %s)"
                     data = (user_no[0], mission[0],current_datetime)  # 您的資料
                     cursor.execute(query, data)
                     connection.commit()
