@@ -120,7 +120,7 @@ def handle_message(event):
                 
                 #算報表
                 
-                query = "SELECT count(*) FROM user"
+                query = "SELECT count(*) FROM users"
                 cursor.execute(query, ())
                 aaa = cursor.fetchone()
                 user_count = aaa[0]
