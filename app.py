@@ -153,7 +153,7 @@ def handle_message(event):
                     cursor.execute(query, data)
                     connection.commit()
                     # LINE 
-                    message = user_nickname+'剛剛完成'+mission_desc+'關卡'
+                    message = str(user_nickname)+'剛剛完成'+ str(mission_desc)+'關卡'
                     response = send_line_notify(message)
                     print(response)
     
