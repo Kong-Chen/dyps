@@ -31,19 +31,6 @@ def adapt_uuid(uuid):
 register_adapter(uuid.UUID, adapt_uuid)
 
 
-#發送line_notify
-def send_line_notify(message):
-    url = 'https://notify-api.line.me/api/notify'
-    token = 'RJhGOMUMHuvBGXM8vpi5IgoGuNLREF7bwKx6heTTQLK' #Group
-    headers = {
-        'Authorization': 'Bearer ' + token
-    }
-    data = {
-        'message': message
-    }
-    response = requests.post(url, headers=headers, data=data)
-    return response
-
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -152,10 +139,6 @@ def handle_message(event):
                     data = (user_no[0], mission[0],current_datetime)  # 您的資料
                     cursor.execute(query, data)
                     connection.commit()
-                    # LINE 
-                    message = '測試一下喔喔喔！'
-                    response = send_line_notify(message)
-                    print(response)
     
     except psycopg2.Error as e:
         # print("資料庫錯誤:", e)
