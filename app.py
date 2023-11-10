@@ -87,6 +87,7 @@ def handle_message(event):
     
     try:
         #判斷使用者
+        cursor = connection.cursor()
         query = "SELECT user_no FROM users WHERE user_id = %s"
         cursor.execute(query, (user_line_id,))
         user_no = cursor.fetchone()
@@ -118,7 +119,7 @@ def handle_message(event):
                 connection.commit()
                 
                 #算報表
-                cursor = connection.cursor()
+                
                 query = "SELECT count(*) FROM user"
                 cursor.execute(query, ())
                 aaa = cursor.fetchone()
