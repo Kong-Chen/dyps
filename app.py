@@ -92,71 +92,67 @@ def handle_message(event):
         cursor.execute(query, (user_line_id,))
         is_admin = cursor.fetchone()
 
-        if is_admin:
-            if user_message =='1118報表':
-                cursor = connection.cursor()
-                query = "SELECT count(*) FROM user"
-                cursor.execute(query, ())
-                aaa = cursor.fetchone()
-                user_count = aaa[0]
-                query = "SELECT COUNT(distinct user_no) FROM user_mission WHERE mission_no = 1"
-                cursor.execute(query, ())
-                aaa = cursor.fetchone()
-                mission1_count = aaa[0]
-                query = "SELECT COUNT(distinct user_no) FROM user_mission WHERE mission_no = 2"
-                cursor.execute(query, ())
-                aaa = cursor.fetchone()
-                mission2_count = aaa[0]
-                query = "SELECT COUNT(distinct user_no) FROM user_mission WHERE mission_no = 3"
-                cursor.execute(query, ())
-                aaa = cursor.fetchone()
-                mission3_count = aaa[0]
-                query = "SELECT COUNT(distinct user_no) FROM user_mission WHERE mission_no = 4"
-                cursor.execute(query, ())
-                aaa = cursor.fetchone()
-                mission4_count = aaa[0]
-                response_word ='已參加遊戲人數:' + str(user_count) + '人' + '\n' + '第一關完成人數:' + str(mission1_count) + '人' + '\n' + '第二關完成人數:' + str(mission2_count) + '人' + '\n' + '第三關完成人數:' + str(mission3_count) + '人' + '\n' + '第四關完成人數:' + str(mission4_count) + '人'
-                line_bot_api.reply_message(
-                    event.reply_token,
-                    TextSendMessage(text=response_word)
-                )
-
-        else:   
-            #判斷使用者資料
+        #算報表
+        cursor = connection.cursor()
+        query = "SELECT count(*) FROM user"
+        cursor.execute(query, ())
+        aaa = cursor.fetchone()
+        user_count = aaa[0]
+        query = "SELECT COUNT(distinct user_no) FROM user_mission WHERE mission_no = 1"
+        cursor.execute(query, ())
+        aaa = cursor.fetchone()
+        mission1_count = aaa[0]
+        query = "SELECT COUNT(distinct user_no) FROM user_mission WHERE mission_no = 2"
+        cursor.execute(query, ())
+        aaa = cursor.fetchone()
+        mission2_count = aaa[0]
+        query = "SELECT COUNT(distinct user_no) FROM user_mission WHERE mission_no = 3"
+        cursor.execute(query, ())
+        aaa = cursor.fetchone()
+        mission3_count = aaa[0]
+        query = "SELECT COUNT(distinct user_no) FROM user_mission WHERE mission_no = 4"
+        cursor.execute(query, ())
+        aaa = cursor.fetchone()
+        mission4_count = aaa[0]
+        response_word ='已參加遊戲人數:' + str(user_count) + '人' + '\n' + '第一關完成人數:' + str(mission1_count) + '人' + '\n' + '第二關完成人數:' + str(mission2_count) + '人' + '\n' + '第三關完成人數:' + str(mission3_count) + '人' + '\n' + '第四關完成人數:' + str(mission4_count) + '人'
+        
+        
+        #判斷使用者
+        query = "SELECT user_no FROM users WHERE user_id = %s"
+        cursor.execute(query, (user_line_id,))
+        user_no = cursor.fetchone()
+        if not user_no:
+            query = "INSERT INTO users (user_id, user_name) VALUES (%s, %s)"
+            data = (user_line_id, user_nickname)  
+            cursor.execute(query, data)
+            connection.commit()
             query = "SELECT user_no FROM users WHERE user_id = %s"
             cursor.execute(query, (user_line_id,))
             user_no = cursor.fetchone()
-            if not user_no:
-                query = "INSERT INTO users (user_id, user_name) VALUES (%s, %s)"
-                data = (user_line_id, user_nickname)  
+    
+        #判斷對話
+        query = "SELECT mission_no,mission_desc FROM mission WHERE mission_code = %s"
+        cursor.execute(query, (user_message,))
+        mission = cursor.fetchone()
+        if mission:
+            #如果有中密碼
+            query = "SELECT B.mission_desc FROM user_mission A join mission B ON A.mission_no=B.mission_no join users C ON A.user_no=C.user_no WHERE C.user_id =%s AND A.mission_no=%s"
+            data = (user_line_id, mission[0])
+            cursor.execute(query, data)
+            mission_desc = cursor.fetchone()
+            if not mission_desc:
+                #塞入獲獎紀錄
+                current_datetime = datetime.now()
+                query = "INSERT INTO user_mission (user_no, mission_no,mission_time) VALUES (%s, %s, %s)"
+                data = (user_no[0], mission[0],current_datetime)  # 您的資料
                 cursor.execute(query, data)
                 connection.commit()
-                query = "SELECT user_no FROM users WHERE user_id = %s"
-                cursor.execute(query, (user_line_id,))
-                user_no = cursor.fetchone()
-        
-            #判斷對話
-            query = "SELECT mission_no,mission_desc FROM mission WHERE mission_code = %s"
-            cursor.execute(query, (user_message,))
-            mission = cursor.fetchone()
-            if mission:
-                #如果有中密碼
-                query = "SELECT B.mission_desc FROM user_mission A join mission B ON A.mission_no=B.mission_no join users C ON A.user_no=C.user_no WHERE C.user_id =%s AND A.mission_no=%s"
-                data = (user_line_id, mission[0])
-                cursor.execute(query, data)
-                mission_desc = cursor.fetchone()
-                if not mission_desc:
-                    #塞入獲獎紀錄
-                    current_datetime = datetime.now()
-                    query = "INSERT INTO user_mission (user_no, mission_no,mission_time) VALUES (%s, %s, %s)"
-                    data = (user_no[0], mission[0],current_datetime)  # 您的資料
-                    cursor.execute(query, data)
-                    connection.commit()
-                    # LINE 
-                    message = '\n' +str(user_nickname)+'剛剛完成第'+ str(mission[0])+'關卡'
-                    response = send_line_notify(message)
-                    print(response)
-    
+                # LINE 
+                message = '\n' +str(user_nickname)+'剛剛完成第'+ str(mission[0])+'關卡'+'\n'+'已參加遊戲人數:' + str(user_count) + '人' + '\n' + '第一關完成人數:' + str(mission1_count) + '人' + '\n' + '第二關完成人數:' + str(mission2_count) + '人' + '\n' + '第三關完成人數:' + str(mission3_count) + '人' + '\n' + '第四關完成人數:' + str(mission4_count) + '人'
+                response = send_line_notify(message)
+                print(response)
+
+   
     except psycopg2.Error as e:
         # print("資料庫錯誤:", e)
         line_bot_api.reply_message(
