@@ -112,6 +112,12 @@ def handle_message(event):
             mission_desc = cursor.fetchone()
             if not mission_desc:
                 #塞入獲獎紀錄
+                current_datetime = datetime.now()
+                query = "INSERT INTO user_mission (user_no, mission_no,mission_time) VALUES (%s, %s, %s)"
+                data = (user_no[0], mission[0],current_datetime)  # 您的資料
+                cursor.execute(query, data)
+                connection.commit()
+                
                 report_query = """
                     SELECT
                         COUNT(DISTINCT u.user_no) AS user_count,
