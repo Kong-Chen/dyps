@@ -112,22 +112,34 @@ def handle_message(event):
             mission_desc = cursor.fetchone()
             if not mission_desc:
                 #塞入獲獎紀錄
-                report_query = """
-                    SELECT
-                        COUNT(DISTINCT u.user_no) AS user_count,
-                        COUNT(DISTINCT CASE WHEN um.mission_no = 1 THEN um.user_no END) AS mission1_count,
-                        COUNT(DISTINCT CASE WHEN um.mission_no = 2 THEN um.user_no END) AS mission2_count,
-                        COUNT(DISTINCT CASE WHEN um.mission_no = 3 THEN um.user_no END) AS mission3_count,
-                        COUNT(DISTINCT CASE WHEN um.mission_no = 4 THEN um.user_no END) AS mission4_count
-                    FROM
-                        users u
-                    LEFT JOIN
-                        user_mission um ON u.user_no = um.user_no
-                """
-                cursor.execute(report_query)
-                result = cursor.fetchone()
-
-                user_count, mission1_count, mission2_count, mission3_count, mission4_count = result
+                current_datetime = datetime.now()
+                query = "INSERT INTO user_mission (user_no, mission_no,mission_time) VALUES (%s, %s, %s)"
+                data = (user_no[0], mission[0],current_datetime)  # 您的資料
+                cursor.execute(query, data)
+                connection.commit()
+                
+                #算報表
+                               
+                query = "SELECT count(*) FROM users"
+                cursor.execute(query, ())
+                aaa = cursor.fetchone()
+                user_count = aaa[0]
+                query = "SELECT COUNT(distinct user_no) FROM user_mission WHERE mission_no = 1"
+                cursor.execute(query, ())
+                aaa = cursor.fetchone()
+                mission1_count = aaa[0]
+                query = "SELECT COUNT(distinct user_no) FROM user_mission WHERE mission_no = 2"
+                cursor.execute(query, ())
+                aaa = cursor.fetchone()
+                mission2_count = aaa[0]
+                query = "SELECT COUNT(distinct user_no) FROM user_mission WHERE mission_no = 3"
+                cursor.execute(query, ())
+                aaa = cursor.fetchone()
+                mission3_count = aaa[0]
+                query = "SELECT COUNT(distinct user_no) FROM user_mission WHERE mission_no = 4"
+                cursor.execute(query, ())
+                aaa = cursor.fetchone()
+                mission4_count = aaa[0]
                 
                 # LINE 
                 message = '\n' +str(user_nickname)+'剛剛完成第'+ str(mission[0])+'關卡'+'\n'+'已參加遊戲人數:' + str(user_count) + '人' + '\n' + '第一關完成人數:' + str(mission1_count) + '人' + '\n' + '第二關完成人數:' + str(mission2_count) + '人' + '\n' + '第三關完成人數:' + str(mission3_count) + '人' + '\n' + '第四關完成人數:' + str(mission4_count) + '人'
