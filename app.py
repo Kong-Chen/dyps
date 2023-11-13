@@ -20,17 +20,6 @@ app = Flask(__name__)
 line_bot_api = LineBotApi(os.environ['LINE_CHANNEL_ACCESS_TOKEN'])
 handler = WebhookHandler(os.environ['LINE_CHANNEL_SECRET'])
 
-def generate_random_code(length):
-    characters = string.ascii_lowercase + string.digits
-    random_code = ''.join(random.choice(characters) for i in range(length))
-    return random_code
-
-# 註冊 UUID 型別的適應器
-def adapt_uuid(uuid):
-    return adapt(str(uuid))
-register_adapter(uuid.UUID, adapt_uuid)
-
-
 #發送line_notify
 def send_line_notify(message):
     url = 'https://notify-api.line.me/api/notify'
